@@ -3,7 +3,7 @@
 @section('title', 'Login - Buitenworks')
 
 @section('content')
-    <div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="container h-100 d-flex flex-column justify-content-center align-items-center py-5">
         <div class="card border-0 shadow-lg p-4" style="max-width: 400px; width: 100%; border-radius: 16px;">
             <h2 class="text-center fw-bold text-uppercase mb-4" style="font-family: 'Oswald', sans-serif;">Login</h2>
 

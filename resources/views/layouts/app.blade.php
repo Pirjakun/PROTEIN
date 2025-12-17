@@ -14,29 +14,64 @@
     @stack('styles')
 </head>
 
-<body>
-    <nav class="site-nav">
-        <div class="nav-inner">
-            <a class="nav-left" href="{{ route('home') }}"><img src="{{ asset('assets/site/buitenworks-logo.png') }}"
-                    class="logo" alt="Buitenworks"></a>
-            <div class="nav-center">
-                <a href="{{ route('catalog') }}">Catalog</a>
-                <a href="/community">Community</a>
-                <a href="/archives">Archives</a>
-                <a href="/about">About</a>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white site-nav shadow-sm">
+        <div class="container-fluid px-4 px-md-5">
+            <a class="navbar-brand nav-left" href="{{ route('home') }}">
+                <img src="{{ asset('assets/site/buitenworks-logo.png') }}" class="logo" alt="Buitenworks"
+                    style="height: 40px; width: auto;">
+            </a>
+
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center bg-white" id="navbarContent">
+                <ul class="navbar-nav gap-3 text-center my-4 my-lg-0 align-items-center">
+                    <li class="nav-item"><a class="nav-link text-uppercase fw-bold text-dark"
+                            href="{{ route('catalog') }}">Catalog</a></li>
+                    <li class="nav-item"><a class="nav-link text-uppercase fw-bold text-dark"
+                            href="/community">Community</a></li>
+                    <li class="nav-item"><a class="nav-link text-uppercase fw-bold text-dark"
+                            href="/archives">Archives</a></li>
+                    <li class="nav-item"><a class="nav-link text-uppercase fw-bold text-dark" href="/about">About</a>
+                    </li>
+
+                    <!-- Mobile Auth Links (Visible only on LG down) -->
+                    <li class="nav-item d-lg-none mt-3 border-top pt-3 w-100">
+                        <a href="#" id="wishlistBtnMobile" class="nav-link text-uppercase fw-bold text-dark"
+                            onclick="document.getElementById('wishlistDrawer').classList.add('open'); document.getElementById('drawerBackdrop').classList.add('visible');">Wishlist</a>
+                    </li>
+                    @guest
+                        <li class="nav-item d-lg-none">
+                            <a href="{{ route('login') }}" class="btn btn-outline-dark w-100 rounded-3">Login</a>
+                        </li>
+                    @else
+                        <li class="nav-item d-lg-none">
+                            <div class="fw-bold mb-2">{{ Auth::user()->name }}</div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="btn btn-danger w-100 rounded-3 btn-sm">Logout</button>
+                            </form>
+                        </li>
+                    @endguest
+                </ul>
             </div>
-            <div class="nav-right">
-                <a href="#" id="wishlistBtn" class="ghost text-decoration-none text-black">Wishlist</a>
+
+            <!-- Desktop Right Menu -->
+            <div class="d-none d-lg-flex align-items-center gap-3">
+                <a href="#" id="wishlistBtn" class="text-decoration-none text-dark fw-bold text-uppercase"
+                    style="font-size: 0.9rem;">Wishlist</a>
 
                 @auth
-                    <div class="dropdown d-inline-block">
+                    <div class="dropdown">
                         <button class="btn btn-dark dropdown-toggle px-3 py-2 rounded-3 fw-bold" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false"
-                            style="min-width: 140px; display: flex; justify-content: space-between; align-items: center;">
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             {{ Auth::user()->name }}
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3 overflow-hidden"
-                            style="min-width: 140px;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3 overflow-hidden">
                             @if(Auth::user()->is_admin)
                                 <li><a class="dropdown-item small fw-bold text-primary"
                                         href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
@@ -48,7 +83,6 @@
                                 <h6 class="dropdown-header small text-muted text-uppercase">Account</h6>
                             </li>
                             <li><a class="dropdown-item small" href="{{ route('profile.show') }}">Profile</a></li>
-
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -61,7 +95,8 @@
                         </ul>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" id="loginBtn" class="primary-outline">Login</a>
+                    <a href="{{ route('login') }}" class="btn btn-outline-dark px-4 py-2 rounded-3 fw-bold text-uppercase"
+                        style="font-size: 0.8rem;">Login</a>
                 @endauth
             </div>
         </div>
@@ -101,11 +136,13 @@
         </script>
     @endif
 
-    @yield('content')
+    <main class="flex-grow-1">
+        @yield('content')
+    </main>
 
-    <footer class="site-footer">
-        <div class="footer-inner d-flex justify-content-center w-100 py-3">
-            <div class="copyright">© Buitenworks</div>
+    <footer class="site-footer bg-black text-white py-4 mt-auto">
+        <div class="container text-center">
+            <div class="copyright fw-bold" style="font-family: 'Oswald', sans-serif;">© Buitenworks</div>
         </div>
     </footer>
 
