@@ -13,13 +13,15 @@ class CommunitySeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('communities')->truncate();
+
         DB::table('communities')->insert([
             ['image' => '1.png', 'created_at' => now(), 'updated_at' => now()],
             ['image' => '2.png', 'created_at' => now(), 'updated_at' => now()],
             ['image' => '3.png', 'created_at' => now(), 'updated_at' => now()],
-            ['image' => '4.png', 'created_at' => now(), 'updated_at' => now()],
-            ['image' => '5.png', 'created_at' => now(), 'updated_at' => now()],
-            ['image' => '6.png', 'created_at' => now(), 'updated_at' => now()],
+            ['image' => '4.jpg', 'created_at' => now(), 'updated_at' => now()],
+            ['image' => '5.jpg', 'created_at' => now(), 'updated_at' => now()],
+            ['image' => '6.jpg', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

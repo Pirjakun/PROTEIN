@@ -12,6 +12,8 @@ class SlideSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('slides')->truncate();
+
         $slides = [
             ['image' => '1.png', 'title' => 'Banner 1'],
             ['image' => '2.png', 'title' => 'Banner 2'],
