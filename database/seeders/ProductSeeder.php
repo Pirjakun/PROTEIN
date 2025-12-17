@@ -33,7 +33,8 @@ class ProductSeeder extends Seeder
                     'BUITENWORKS - Vol.3 Nullism Black Long sleeve T-Shirt/6.png',
                 ],
                 'category' => 'longsleeve',
-                'shopee_link' => 'https://shopee.co.id/BUITENWORKS-Vol.3-Nullism-Long-sleeve-T-Shirt-i.1450606504.42816990879?extraParams=%7B%22display_model_id%22%3A301402424922%7D'
+                'shopee_link' => 'https://shopee.co.id/BUITENWORKS-Vol.3-Nullism-Long-sleeve-T-Shirt-i.1450606504.42816990879?extraParams=%7B%22display_model_id%22%3A301402424922%7D',
+                'is_featured' => true
             ],
             [
                 'name' => 'BUITENWORKS - Vol.3 Nullism Grey Long sleeve T-Shirt',
@@ -49,7 +50,8 @@ class ProductSeeder extends Seeder
                     'BUITENWORKS - Vol.3 Nullism Long sleeve T-Shirt/6.png',
                 ],
                 'category' => 'longsleeve',
-                'shopee_link' => 'https://shopee.co.id/BUITENWORKS-Vol.3-Nullism-Long-sleeve-T-Shirt-i.1450606504.40166988322?extraParams=%7B%22display_model_id%22%3A261403389524%7D'
+                'shopee_link' => 'https://shopee.co.id/BUITENWORKS-Vol.3-Nullism-Long-sleeve-T-Shirt-i.1450606504.40166988322?extraParams=%7B%22display_model_id%22%3A261403389524%7D',
+                'is_featured' => true
             ],
             [
                 'name' => 'BUITENWORKS - Vol.1 Stargaze Oversized Boxy T-Shirt',
@@ -66,7 +68,8 @@ class ProductSeeder extends Seeder
                     'BUITENWORKS - Vol.1 Stargaze Oversized Boxy T-Shirt/7.png',
                 ],
                 'category' => 'short sleeve',
-                'shopee_link' => 'https://shopee.co.id/BUITENWORKS-Vol.1-Stargaze-Oversized-Boxy-T-Shirt-i.1450606504.26874922331?extraParams=%7B%22display_model_id%22%3A242569419158%7D'
+                'shopee_link' => 'https://shopee.co.id/BUITENWORKS-Vol.1-Stargaze-Oversized-Boxy-T-Shirt-i.1450606504.26874922331?extraParams=%7B%22display_model_id%22%3A242569419158%7D',
+                'is_featured' => true
             ],
             [
                 'name' => 'BUITENWORKS - Vol. 2 Liquera WHITE Boxy T-Shirt',
@@ -83,7 +86,8 @@ class ProductSeeder extends Seeder
                     'BUITENWORKS - Vol. 2 Liquera WHITE Boxy T-Shirt/7.png',
                 ],
                 'category' => 'short sleeve',
-                'shopee_link' => 'https://shopee.co.id/BUITENWORKS-Vol.-2-Liquera-WHITE-Boxy-T-Shirt-i.1450606504.26681640067?extraParams=%7B%22display_model_id%22%3A248054076794%7D'
+                'shopee_link' => 'https://shopee.co.id/BUITENWORKS-Vol.-2-Liquera-WHITE-Boxy-T-Shirt-i.1450606504.26681640067?extraParams=%7B%22display_model_id%22%3A248054076794%7D',
+                'is_featured' => false
             ],
             [
                 'name' => 'BUITENWORKS - Vol. 2 Liquera BLACK Boxy T-Shirt',
