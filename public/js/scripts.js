@@ -1,55 +1,57 @@
-
 // Buitenworks mini-ecommerce front-end logic
-// Single-root localStorage DB, user auth, cart, wishlist, orders, loader, catalog sorting
+// Single-root localStorage DB, user auth, wishlist, loader, catalog sorting
 
 (function () {
+  console.log(">>> SCRIPTS.JS LOADED <<<");
+
   const STORAGE_KEY = 'buiten_db_v1';
 
+  // Fallback products (Legacy)
   const PRODUCTS = [
     {
       id: 1,
-      title: "BUITENWORKS Vol.3 Nullism Long-sleeve T-Shirt",
+      title: "BUITENWORKS - Vol.3 Nullism BLACK Long sleeve T-Shirt",
       price: 145000,
       type: "longsleeve",
       featured: true,
-      img: "assets/prod1.png",
-      shopee: "https://shopee.co.id/BUITENWORKS-Vol.3-Nullism-Long-sleeve-T-Shirt-i.1450606504.42816990879?extraParams=%7B%22display_model_id%22%3A301402424922%7D"
+      img: "assets/products/prod1.png",
+      shopee_link: "https://shopee.co.id/BUITENWORKS-Vol.3-Nullism-Long-sleeve-T-Shirt-i.1450606504.42816990879?extraParams=%7B%22display_model_id%22%3A301402424922%7D"
     },
     {
       id: 2,
-      title: "BUITENWORKS Vol.3 Nullism Long-sleeve T-Shirt (Variant)",
+      title: "BUITENWORKS - Vol.3 Nullism Grey Long sleeve T-Shirt",
       price: 150000,
       type: "longsleeve",
       featured: false,
-      img: "assets/prod2.png",
-      shopee: "https://shopee.co.id/BUITENWORKS-Vol.3-Nullism-Long-sleeve-T-Shirt-i.1450606504.40166988322?extraParams=%7B%22display_model_id%22%3A261403389524%7D"
+      img: "assets/products/prod2.png",
+      shopee_link: "https://shopee.co.id/BUITENWORKS-Vol.3-Nullism-Long-sleeve-T-Shirt-i.1450606504.40166988322?extraParams=%7B%22display_model_id%22%3A261403389524%7D"
     },
     {
       id: 3,
-      title: "BUITENWORKS Vol.1 Stargaze Oversized Boxy T-Shirt",
+      title: "BUITENWORKS - Vol.1 Stargaze Oversized Boxy T-Shirt",
       price: 150000,
       type: "boxy",
       featured: true,
-      img: "assets/prod3.png",
-      shopee: "https://shopee.co.id/BUITENWORKS-Vol.1-Stargaze-Oversized-Boxy-T-Shirt-i.1450606504.26874922331?extraParams=%7B%22display_model_id%22%3A242569419158%7D"
+      img: "assets/products/prod3.png",
+      shopee_link: "https://shopee.co.id/BUITENWORKS-Vol.1-Stargaze-Oversized-Boxy-T-Shirt-i.1450606504.26874922331?extraParams=%7B%22display_model_id%22%3A242569419158%7D"
     },
     {
       id: 4,
-      title: "BUITENWORKS Vol.2 Liquera WHITE Boxy T-Shirt",
+      title: "BUITENWORKS - Vol. 2 Liquera WHITE Boxy T-Shirt",
       price: 170000,
       type: "boxy",
       featured: false,
-      img: "assets/prod4.png",
-      shopee: "https://shopee.co.id/BUITENWORKS-Vol.-2-Liquera-WHITE-Boxy-T-Shirt-i.1450606504.26681640067?extraParams=%7B%22display_model_id%22%3A248054076794%7D"
+      img: "assets/products/prod4.png",
+      shopee_link: "https://shopee.co.id/BUITENWORKS-Vol.-2-Liquera-WHITE-Boxy-T-Shirt-i.1450606504.26681640067?extraParams=%7B%22display_model_id%22%3A248054076794%7D"
     },
     {
       id: 5,
-      title: "BUITENWORKS Vol.2 Liquera BLACK Boxy T-Shirt",
+      title: "BUITENWORKS - Vol. 2 Liquera BLACK Boxy T-Shirt",
       price: 170000,
       type: "boxy",
       featured: false,
-      img: "assets/prod5.png",
-      shopee: "https://shopee.co.id/BUITENWORKS-Vol.-2-Liquera-BLACK-Boxy-T-Shirt-i.1450606504.22190736060?extraParams=%7B%22display_model_id%22%3A198375737907%7D"
+      img: "assets/products/prod5.png",
+      shopee_link: "https://shopee.co.id/BUITENWORKS-Vol.-2-Liquera-BLACK-Boxy-T-Shirt-i.1450606504.22190736060?extraParams=%7B%22display_model_id%22%3A198375737907%7D"
     }
   ];
 
@@ -92,9 +94,7 @@
       email: (payload.email || '').trim().toLowerCase(),
       passwordHash: hashPassword(payload.password || ''),
       birthdate: payload.birthdate || '',
-      cart: [],
-      wishlist: [],
-      orders: []
+      wishlist: []
     };
     db.users.push(user);
     db.session = { loggedInUserId: id };
@@ -106,8 +106,6 @@
     // Priority 1: Server Side User (injected via Blade)
     if (typeof window.AUTH_USER !== 'undefined') {
       if (window.AUTH_USER === null) {
-        // Server says Guest, so we force Guest mode locally too
-        // Optional: clear local session to keep it clean
         if (db.session) {
           db.session = null;
           saveDB(db);
@@ -115,7 +113,6 @@
         return null;
       }
 
-      // Ensure this user exists in local DB for cart persistence
       const existing = db.users.find(u => u.email === window.AUTH_USER.email);
       if (!existing) {
         const newUser = {
@@ -123,16 +120,13 @@
           name: window.AUTH_USER.name,
           email: window.AUTH_USER.email,
           passwordHash: 'SERVER_AUTH',
-          cart: [],
-          wishlist: [],
-          orders: []
+          wishlist: []
         };
         db.users.push(newUser);
         db.session = { loggedInUserId: newUser.id };
         saveDB(db);
         return newUser;
       }
-      // Sync session if needed
       if (!db.session || db.session.loggedInUserId !== existing.id) {
         db.session = { loggedInUserId: existing.id };
         saveDB(db);
@@ -166,10 +160,11 @@
       if (serverProd) {
         return {
           id: serverProd.id,
-          title: serverProd.name, // Map 'name' to 'title'
-          price: parseInt(serverProd.price), // Ensure integer for clean format
-          img: '/assets/' + serverProd.image, // Absolute path prefix
-          featured: false
+          title: serverProd.name,
+          price: parseInt(serverProd.price),
+          img: '/assets/products/' + serverProd.image,
+          featured: false,
+          shopee_link: serverProd.shopee_link
         };
       }
     }
@@ -201,7 +196,6 @@
   function openAuth(mode) {
     const m = document.getElementById('authModal');
     if (!m) {
-      // Fallback: redirect to login page if modal doesn't exist
       window.location.href = '/login';
       return;
     }
@@ -210,92 +204,35 @@
     switchAuthMode(mode || 'login');
   }
 
-  // ... (rest of auth functions)
-
-  function renderCartUI(db) {
-    const user = getCurrentUser(db);
-    const cart = user ? getUserCart(user) : [];
-    const listEl = document.getElementById('cartItems');
-    const emptyEl = document.getElementById('cartEmpty');
-    const totalEl = document.getElementById('cartTotal');
-    const footerEl = document.querySelector('.cart-footer');
-
-    if (!listEl || !emptyEl || !totalEl) return;
-
-    listEl.innerHTML = '';
-
-    if (!cart.length) {
-      emptyEl.style.display = 'block';
-      if (footerEl) footerEl.style.display = 'none';
-
-      // Custom Empty State
-      if (!user) {
-        emptyEl.innerHTML = `
-            <div class="text-center py-5">
-              <h5 class="fw-bold mb-3">Your cart is empty</h5>
-              <p class="text-muted mb-4 small px-4">Discover products or log in to pick up where you left off.</p>
-              <div class="d-flex flex-column gap-2 px-4">
-                 <button class="btn btn-outline-dark w-100 rounded-pill close-drawer-btn">Continue Shopping</button>
-                 <a href="/login" class="btn btn-dark w-100 rounded-pill">Login</a>
-              </div>
-            </div>
-         `;
-      } else {
-        emptyEl.innerHTML = `
-            <div class="text-center py-5">
-              <h5 class="fw-bold mb-3">Your cart is empty</h5>
-              <p class="text-muted mb-4 small">Looks like you haven't added anything to your cart yet.</p>
-              <button class="btn btn-outline-dark w-100 rounded-pill close-drawer-btn">Continue Shopping</button>
-            </div>
-         `;
-      }
-
-      // Attach event listeners to new buttons
-      const closeBtns = emptyEl.querySelectorAll('.close-drawer-btn');
-      closeBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
-          const drawer = document.getElementById('cartDrawer');
-          if (drawer) {
-            drawer.classList.remove('open');
-            drawer.setAttribute('aria-hidden', 'true');
-          }
-        });
-      });
-
-      totalEl.textContent = formatRupiah(0);
-      return;
+  function closeAuth() {
+    const m = document.getElementById('authModal');
+    if (m) {
+      m.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('no-scroll');
     }
+  }
 
-    emptyEl.style.display = 'none';
-    if (footerEl) footerEl.style.display = 'block';
+  function switchAuthMode(mode) {
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const tabs = document.querySelectorAll('.auth-tab');
 
-    let total = 0;
-    cart.forEach(item => {
-      const p = getProductById(item.productId);
-      if (!p) return;
-      const lineTotal = p.price * item.qty;
-      total += lineTotal;
-      const sizeLabel = item.size ? `<div class="small text-muted" style="font-size:11px">Size: ${item.size}</div>` : '';
-      const row = document.createElement('div');
-      row.className = 'cart-row';
-      row.innerHTML = `
-        <div class="cart-row-main">
-          <img src="${p.img}" alt="${p.title}">
-          <div class="cart-row-info">
-            <div class="cart-row-title">${p.title}</div>
-            ${sizeLabel}
-            <div class="cart-row-price">${formatRupiah(p.price)}</div>
-          </div>
-        </div>
-        <div class="cart-row-actions">
-          <input type="number" min="1" value="${item.qty}" data-id="${p.id}" data-size="${item.size || ''}" class="cart-qty-input" />
-          <button class="cart-remove-btn" data-id="${p.id}" data-size="${item.size || ''}">✕</button>
-        </div>
-      `;
-      listEl.appendChild(row);
+    tabs.forEach(t => {
+      if (t.dataset.mode === mode) t.classList.add('active');
+      else t.classList.remove('active');
     });
-    totalEl.textContent = formatRupiah(total);
-    totalEl.textContent = formatRupiah(total);
+
+    if (mode === 'login') {
+      if (loginForm) loginForm.style.display = 'block';
+      if (signupForm) signupForm.style.display = 'none';
+    } else {
+      if (loginForm) loginForm.style.display = 'none';
+      if (signupForm) signupForm.style.display = 'block';
+    }
+  }
+
+  function renderNavUser(db) {
+    // Handled by server-side blade usually, but for client-side legacy
   }
 
   function renderWishlistUI(db) {
@@ -321,19 +258,20 @@
 
       const row = document.createElement('div');
       row.className = 'cart-row';
+      const link = p.shopee_link || '#';
       row.innerHTML = `
-        <div class="cart-row-main">
+  <div class="cart-row-main">
           <img src="${p.img}" alt="${p.title}">
           <div class="cart-row-info">
             <div class="cart-row-title">${p.title}</div>
             <div class="cart-row-price">${formatRupiah(p.price)}</div>
-            <a href="${p.shopee || '#'}" target="_blank" class="small text-muted" style="font-size:11px; text-decoration:underline;">View on Shopee</a>
+            <a href="${link}" target="_blank" class="small text-muted" style="font-size:11px; text-decoration:underline;">View on Shopee</a>
           </div>
         </div>
         <div class="cart-row-actions">
            <button class="cart-remove-btn wishlist-remove-btn" data-id="${p.id}">✕</button>
         </div>
-      `;
+`;
       listEl.appendChild(row);
     });
 
@@ -345,7 +283,6 @@
         const dbNow = loadDB();
         toggleWishlist(dbNow, pid);
         renderWishlistUI(dbNow);
-        // Also update catalog hearts if visible
         renderCatalog(dbNow);
       });
     });
@@ -365,35 +302,7 @@
       if (emailLine) emailLine.textContent = 'Please login to see your account details.';
     }
 
-    // orders
-    const ordersWrap = document.getElementById('ordersList');
-    if (ordersWrap) {
-      ordersWrap.innerHTML = '';
-      if (!user || !user.orders || !user.orders.length) {
-        ordersWrap.innerHTML = '<div class="empty">No orders yet.</div>';
-      } else {
-        user.orders.forEach(o => {
-          const div = document.createElement('div');
-          div.className = 'order-card';
-          const itemCount = o.items ? o.items.reduce((sum, x) => sum + x.qty, 0) : 0;
-          div.innerHTML = `
-            <div class="order-head">
-              <div class="order-id">${o.orderId}</div>
-              <div class="order-status">${o.status}</div>
-            </div>
-            <div class="order-meta">
-              <span>${new Date(o.date).toLocaleString()}</span>
-              <span>${itemCount} item(s)</span>
-              <span>${formatRupiah(o.total)}</span>
-            </div>
-            <div class="order-source">Source: ${o.source || 'Shopee'}</div>
-          `;
-          ordersWrap.appendChild(div);
-        });
-      }
-    }
-
-    // wishlist
+    // wishlist in account page
     const wishlistWrap = document.getElementById('wishlistList');
     if (wishlistWrap) {
       wishlistWrap.innerHTML = '';
@@ -405,14 +314,15 @@
           if (!p) return;
           const card = document.createElement('article');
           card.className = 'wishlist-card';
+          const link = p.shopee_link || '#';
           card.innerHTML = `
-            <img src="${p.img}" alt="${p.title}">
-            <div class="wishlist-info">
-              <div class="wishlist-title">${p.title}</div>
-              <div class="wishlist-price">${formatRupiah(p.price)}</div>
-              <a href="${p.shopee}" target="_blank" rel="noopener noreferrer" class="wishlist-link">View on Shopee</a>
-            </div>
-          `;
+   <img src = "${p.img}" alt = "${p.title}" >
+    <div class="wishlist-info">
+      <div class="wishlist-title">${p.title}</div>
+      <div class="wishlist-price">${formatRupiah(p.price)}</div>
+      <a href="${link}" target="_blank" rel="noopener noreferrer" class="wishlist-link">View on Shopee</a>
+    </div>
+`;
           wishlistWrap.appendChild(card);
         });
       }
@@ -427,124 +337,199 @@
     }
   }
 
+  // Catalog State
+  let catalogState = {
+    search: '',
+    sort: 'featured',
+    filter: 'all'
+  };
+
+  // 1. Get Source Data (Server Products preferred)
+  function getSourceData() {
+    if (typeof window.SERVER_PRODUCTS !== 'undefined' && Array.isArray(window.SERVER_PRODUCTS)) {
+      return window.SERVER_PRODUCTS.map(sp => ({
+        id: sp.id,
+        title: sp.name,
+        price: Number(sp.price), // Ensure number
+        type: sp.category,
+        featured: false,
+        img: '/assets/products/' + sp.image, // Ensure absolute path with leading slash if needed, or relative 'assets/'
+        shopee_link: sp.shopee_link
+      }));
+    } else {
+      return PRODUCTS.slice();
+    }
+  }
+
   function renderCatalog(db) {
     const grid = document.getElementById('products');
     if (!grid) return;
 
-    const searchInput = document.getElementById('searchInput');
-    const sortSelect = document.getElementById('sortSelect');
-    const typeChips = document.querySelectorAll('.chip[data-type]');
-    let state = {
-      search: '',
-      sort: 'featured',
-      type: 'all'
+    let list = getSourceData();
+
+    // Helper to get volume
+    const getVol = (title) => {
+      const match = title.match(/Vol\.?\s*(\d+)/i);
+      return match ? parseInt(match[1], 10) : 0;
     };
 
-    function apply() {
-      let list = PRODUCTS.slice();
-      if (state.type !== 'all') {
-        list = list.filter(p => p.type === state.type);
-      }
-      if (state.search) {
-        const q = state.search.toLowerCase();
-        list = list.filter(p => p.title.toLowerCase().includes(q));
-      }
-      if (state.sort === 'price-asc') {
-        list.sort((a, b) => a.price - b.price);
-      } else if (state.sort === 'price-desc') {
-        list.sort((a, b) => b.price - a.price);
-      } else {
-        list.sort((a, b) => {
-          if (a.featured && !b.featured) return -1;
-          if (!a.featured && b.featured) return 1;
-          return a.id - b.id;
-        });
-      }
+    // Filter
+    if (catalogState.filter === 'featured') {
+      // Featured: Vol.3 Collection + Vol.1 Stargaze
+      list = list.filter(p => {
+        const t = p.title.toLowerCase();
+        return t.includes('vol.3') || t.includes('vol.1 stargaze');
+      });
+    } else if (catalogState.filter !== 'all') {
+      list = list.filter(p => (p.type || '').toLowerCase() === (catalogState.filter || '').toLowerCase());
+    }
 
-      const user = getCurrentUser(db);
-      const wishlist = user ? getUserWishlist(user) : [];
+    // Search
+    if (catalogState.search) {
+      const q = catalogState.search.toLowerCase();
+      list = list.filter(p => p.title.toLowerCase().includes(q));
+    }
 
-      grid.innerHTML = '';
-      list.forEach(p => {
-        const wishActive = wishlist.includes(p.id);
-        const card = document.createElement('article');
-        card.className = 'product-card';
-        card.setAttribute('data-id', p.id);
-        card.innerHTML = `
-          <a class="product-link" href="${p.shopee}" target="_blank" rel="noopener noreferrer">
-            <div class="product-thumb">
-              <img src="${p.img}" alt="${p.title}">
-            </div>
-          </a>
-          <div class="product-info">
-            <div class="product-title">${p.title}</div>
-            <div class="product-meta-row">
-              <span class="product-price">${formatRupiah(p.price)}</span>
-              <span class="product-pill">${p.type === 'longsleeve' ? 'Longsleeve' : 'Boxy Tee'}</span>
-            </div>
-            <div class="product-actions-row">
-              <button class="btn add-cart-btn" data-id="${p.id}">Add to Cart</button>
-              <button class="wishlist-btn ${wishActive ? 'active' : ''}" data-id="${p.id}" aria-label="wishlist">
-                <span class="heart-icon">${wishActive ? '♥' : '♡'}</span>
-              </button>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
+    // Sort
+    console.log('Sorting by:', catalogState.sort);
+    if (catalogState.sort === 'price-asc') {
+      list.sort((a, b) => {
+        return Number(a.price) - Number(b.price);
+      });
+    } else if (catalogState.sort === 'price-desc') {
+      list.sort((a, b) => {
+        return Number(b.price) - Number(a.price);
+      });
+    } else {
+      // Default / Featured: Sort by Volume (Newest/Highest Vol first)
+      list.sort((a, b) => {
+        const getVol = (title) => {
+          const match = title.match(/Vol\.?\s*(\d+)/i);
+          return match ? parseInt(match[1], 10) : 0;
+        };
+        const volA = getVol(a.title);
+        const volB = getVol(b.title);
+
+        // If volumes differ, higher volume comes first
+        if (volB !== volA) return volB - volA;
+
+        // If volumes are same or not found, fallback to ID (newer ID first usually implies newer addition)
+        return b.id - a.id;
       });
     }
 
-    if (searchInput) {
-      searchInput.addEventListener('input', function () {
-        state.search = this.value || '';
-        apply();
-      });
-    }
-    if (sortSelect) {
-      sortSelect.addEventListener('change', function () {
-        state.sort = this.value;
-        apply();
-      });
-    }
-    typeChips.forEach(chip => {
-      chip.addEventListener('click', function () {
-        typeChips.forEach(c => c.classList.remove('chip-active'));
-        this.classList.add('chip-active');
-        state.type = this.dataset.type;
-        apply();
-      });
-    });
+    const user = getCurrentUser(db);
+    const wishlist = user ? getUserWishlist(user) : [];
 
-    apply();
+    grid.innerHTML = '';
+    if (list.length === 0) {
+      grid.innerHTML = '<div class="col-12 text-center text-muted py-5"><p>No products found.</p></div>';
+      return;
+    }
 
-    // event delegation for add to cart and wishlist
-    grid.addEventListener('click', function (e) {
-      const target = e.target.closest('button');
-      if (!target) return;
-      const pid = parseInt(target.dataset.id, 10);
-      if (target.classList.contains('add-cart-btn')) {
-        const dbNow = loadDB();
-        const res = addToCart(dbNow, pid);
-        if (res.error === 'LOGIN_REQUIRED') {
-          openAuth('login');
-        } else {
-          renderCartUI(dbNow);
+    list.forEach(p => {
+      const wishActive = wishlist.includes(p.id);
+      const cardWrapper = document.createElement('div');
+      cardWrapper.className = 'col-6 col-md-4 col-lg-4';
+
+      const shopeeLink = p.shopee_link || '#';
+
+      cardWrapper.innerHTML = `
+  <div class="d-flex flex-column h-100 product-card-hover rounded p-2">
+            <a class="text-decoration-none text-dark mb-2" href="products/${p.id}">
+                <div class="position-relative bg-white rounded overflow-hidden ratio ratio-1x1 mb-3">
+                    <img src="${p.img}" class="img-fluid object-fit-cover p-0 w-100 h-100" alt="${p.title}">
+                </div>
+                <div class="text-start px-2">
+                    <div class="fw-bold text-uppercase small mb-1" style="font-family: 'Oswald', sans-serif;">
+                        ${p.title}
+                    </div>
+                    <div class="fw-semibold small">${formatRupiah(p.price)}</div>
+                </div>
+            </a>
+            <div class="px-2 mt-auto d-flex gap-2">
+                 <a href="${shopeeLink}" target="_blank" class="btn btn-dark btn-sm flex-grow-1 shopee-btn" style="font-size: 12px;">Buy on Shopee</a>
+                 <button class="wishlist-btn ${wishActive ? 'active' : ''} btn btn-link p-0 text-dark border-0" data-id="${p.id}">
+                    ${wishActive
+          ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-heart-fill text-danger" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/></svg>`
+          : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16"><path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/></svg>`
         }
-      } else if (target.classList.contains('wishlist-btn')) {
-        const dbNow = loadDB();
-        const res = toggleWishlist(dbNow, pid);
-        if (res.error === 'LOGIN_REQUIRED') {
-          openAuth('login');
-        } else {
-          // re-render catalog to refresh hearts
-          renderCatalog(dbNow);
-        }
-      }
+                 </button>
+            </div>
+        </div >
+  `;
+      grid.appendChild(cardWrapper);
     });
   }
 
-  // ---------- Cart & Wishlist Logic (Hoisted) ----------
-  function getUserCart(user) { return user.cart || []; }
+  function initCatalogListeners() {
+    console.log(">>> initCatalogListeners executing... <<<");
+    const grid = document.getElementById('products');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+
+    console.log("Elements found:", {
+      grid: !!grid,
+      searchInput: !!searchInput,
+      sortSelect: !!sortSelect
+    });
+
+    const filterRadios = document.querySelectorAll('.filter-check');
+
+    // Listeners
+    if (searchInput) {
+      searchInput.value = catalogState.search;
+      searchInput.addEventListener('input', function () {
+        catalogState.search = this.value || '';
+        renderCatalog(loadDB());
+      });
+    }
+    if (sortSelect) {
+      sortSelect.value = catalogState.sort;
+      sortSelect.addEventListener('change', function () {
+        console.log('Sort changed to:', this.value);
+        catalogState.sort = this.value;
+        renderCatalog(loadDB());
+      });
+    }
+
+    // Sort logic inside renderCatalog is already using catalogState.sort
+    // But let's verify renderCatalog reads it correctly.
+    console.log('Catalog logic initialized. State:', catalogState);
+
+    filterRadios.forEach(radio => {
+      if (radio.value === catalogState.filter) radio.checked = true; // Sync view
+      radio.addEventListener('change', function () {
+        if (this.checked) {
+          catalogState.filter = this.value;
+          renderCatalog(loadDB());
+        }
+      });
+    });
+
+    // Initial render
+    renderCatalog(loadDB());
+
+    // Grid Listener for Wishlist
+    if (grid) {
+      grid.addEventListener('click', function (e) {
+        const target = e.target.closest('button');
+        if (!target) return;
+        const pid = parseInt(target.dataset.id, 10);
+        if (target.classList.contains('wishlist-btn')) {
+          const dbNow = loadDB();
+          const res = toggleWishlist(dbNow, pid);
+          if (res.error === 'LOGIN_REQUIRED') {
+            openAuth('login');
+          } else {
+            renderCatalog(dbNow);
+          }
+        }
+      });
+    }
+  }
+
+  // ---------- Wishlist Logic ----------
   function getUserWishlist(user) { return user.wishlist || []; }
 
   function toggleWishlist(db, productId) {
@@ -558,89 +543,17 @@
     return { ok: true, wishlist: user.wishlist.slice() };
   }
 
-  function addToCart(db, productId, qty = 1, size = null) {
-    const user = getCurrentUser(db);
-    if (!user) return { error: 'LOGIN_REQUIRED' };
-    if (!user.cart) user.cart = [];
-
-    // Find item with same ID AND same Size
-    const item = user.cart.find(c => c.productId === productId && c.size === size);
-    if (item) {
-      item.qty += qty;
-    } else {
-      user.cart.push({ productId, qty, size });
-    }
-    saveDB(db);
-    return { ok: true, cart: user.cart.slice() };
-  }
-
-  function updateCartQty(db, productId, qty, size = null) {
-    const user = getCurrentUser(db);
-    if (!user || !user.cart) return;
-
-    const item = user.cart.find(c => c.productId === productId && c.size === size);
-    if (item) {
-      item.qty = qty;
-      if (item.qty <= 0) {
-        user.cart = user.cart.filter(c => !(c.productId === productId && c.size === size));
-      }
-    }
-    saveDB(db);
-  }
-
-  function clearCart(db) {
-    const user = getCurrentUser(db);
-    if (!user) return;
-    user.cart = [];
-    saveDB(db);
-  }
-
-  function buildOrderFromCart(user) {
-    if (!user || !user.cart || !user.cart.length) return null;
-    const id = 'ORD-' + Date.now();
-    let total = 0;
-    const items = user.cart.map(c => {
-      const p = getProductById(c.productId);
-      if (!p) return null;
-      const lineTotal = p.price * c.qty;
-      total += lineTotal;
-      return {
-        productId: p.id,
-        title: p.title,
-        qty: c.qty,
-        size: c.size,
-        price: p.price,
-        lineTotal
-      };
-    }).filter(Boolean);
-    const order = {
-      orderId: id,
-      items,
-      total,
-      date: new Date().toISOString(),
-      status: 'Saved',
-      source: 'Shopee'
-    };
-    return order;
-  }
-
   // ---------- main init ----------
-  // Expose helpers to window for Blade interaction
   window.loadDB = loadDB;
   window.saveDB = saveDB;
   window.getCurrentUser = getCurrentUser;
   window.getUserWishlist = getUserWishlist;
   window.toggleWishlist = toggleWishlist;
-  window.addToCart = addToCart;
-  window.renderCartUI = renderCartUI;
   window.renderWishlistUI = renderWishlistUI;
 
-  // ---------- main init ----------
   document.addEventListener('DOMContentLoaded', function () {
     let db = loadDB();
 
-    // cinematic loader on first load
-    // open auth from standalone login page
     const openAuthBtnPage = document.getElementById('openAuthFromPage');
     if (openAuthBtnPage) {
       openAuthBtnPage.addEventListener('click', function (e) {
@@ -649,7 +562,6 @@
       });
     }
 
-
     const already = sessionStorage.getItem('buiten_seen_loader');
     if (!already) {
       sessionStorage.setItem('buiten_seen_loader', '1');
@@ -657,7 +569,6 @@
       setTimeout(hideLoader, 2300);
     }
 
-    // nav login button
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
       loginBtn.addEventListener('click', function (e) {
@@ -665,7 +576,6 @@
         db = loadDB();
         const user = getCurrentUser(db);
         if (user) {
-          // go to account page
           window.location.href = 'account.html';
         } else {
           openAuth('login');
@@ -673,7 +583,6 @@
       });
     }
 
-    // drawer helper
     function toggleDrawer(drawerId, open) {
       const drawer = document.getElementById(drawerId);
       const backdrop = document.getElementById('drawerBackdrop');
@@ -690,7 +599,6 @@
       } else {
         drawer.classList.remove('open');
         drawer.setAttribute('aria-hidden', 'true');
-        // only hide backdrop if NO other drawer is open (for now we assume one at a time)
         if (backdrop) {
           backdrop.classList.remove('open');
           backdrop.setAttribute('aria-hidden', 'true');
@@ -699,17 +607,8 @@
       }
     }
 
-    // cart button (nav)
-    if (cartBtn) {
-      cartBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        toggleDrawer('cartDrawer', true);
-        db = loadDB();
-        renderCartUI(db);
-      });
-    }
+    // Note: Cart button logic removed.
 
-    // wishlist button (nav)
     const wishlistBtn = document.getElementById('wishlistBtn');
     if (wishlistBtn) {
       wishlistBtn.addEventListener('click', function (e) {
@@ -717,15 +616,6 @@
         toggleDrawer('wishlistDrawer', true);
         db = loadDB();
         renderWishlistUI(db);
-      });
-    }
-
-    // close cart
-    const closeCartBtn = document.getElementById('closeCart');
-    if (closeCartBtn) {
-      closeCartBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        toggleDrawer('cartDrawer', false);
       });
     }
 
@@ -737,121 +627,13 @@
       });
     }
 
-    // backdrop click
     const backdrop = document.getElementById('drawerBackdrop');
     if (backdrop) {
       backdrop.addEventListener('click', function () {
-        toggleDrawer('cartDrawer', false);
         toggleDrawer('wishlistDrawer', false);
       });
     }
 
-    // cart events (qty & remove)
-    const cartItems = document.getElementById('cartItems');
-    if (cartItems) {
-      cartItems.addEventListener('input', function (e) {
-        if (e.target.classList.contains('cart-qty-input')) {
-          const id = parseInt(e.target.getAttribute('data-id'), 10);
-          const size = e.target.getAttribute('data-size') || null;
-          let qty = parseInt(e.target.value, 10) || 1;
-          if (qty < 1) qty = 1;
-          db = loadDB();
-          updateCartQty(db, id, qty, size);
-          renderCartUI(db);
-        }
-      });
-      cartItems.addEventListener('click', function (e) {
-        if (e.target.classList.contains('cart-remove-btn')) {
-          const id = parseInt(e.target.getAttribute('data-id'), 10);
-          const size = e.target.getAttribute('data-size') || null;
-          db = loadDB();
-          updateCartQty(db, id, 0, size);
-          renderCartUI(db);
-        }
-      });
-    }
-
-    // clear cart
-    const clearCartBtn = document.getElementById('clearCartBtn');
-    if (clearCartBtn) {
-      clearCartBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        db = loadDB();
-        clearCart(db);
-        renderCartUI(db);
-      });
-    }
-
-    // checkout
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    if (checkoutBtn) {
-      checkoutBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        db = loadDB();
-        const user = getCurrentUser(db);
-        if (!user) {
-          openAuth('login');
-          return;
-        }
-        const checkoutModal = document.getElementById('checkoutModal');
-        if (checkoutModal) {
-          checkoutModal.setAttribute('aria-hidden', 'false');
-          document.body.classList.add('no-scroll');
-        }
-      });
-    }
-
-    // checkout modal buttons
-    const checkoutClose = document.getElementById('closeCheckout');
-    if (checkoutClose) {
-      checkoutClose.addEventListener('click', function (e) {
-        e.preventDefault();
-        const m = document.getElementById('checkoutModal');
-        if (m) {
-          m.setAttribute('aria-hidden', 'true');
-          document.body.classList.remove('no-scroll');
-        }
-      });
-    }
-
-    const saveOrderBtn = document.getElementById('saveOrderBtn');
-    const saveAndGoBtn = document.getElementById('saveAndGoBtn');
-    if (saveOrderBtn) {
-      saveOrderBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        db = loadDB();
-        const res = saveOrderFromCart(db);
-        if (!res.error) {
-          clearCart(db);
-          renderCartUI(db);
-          renderAccountPage(db);
-          alert('Order saved to your history.');
-        }
-      });
-    }
-    if (saveAndGoBtn) {
-      saveAndGoBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        db = loadDB();
-        const user = getCurrentUser(db);
-        const res = saveOrderFromCart(db);
-        if (res.error) {
-          return;
-        }
-        // redirect to first product's Shopee link
-        if (user && user.cart && user.cart.length) {
-          const first = user.cart[0];
-          const p = getProductById(first.productId);
-          clearCart(db);
-          renderCartUI(db);
-          if (p && p.shopee) {
-            window.open(p.shopee, '_blank');
-          }
-        }
-      });
-    }
-
-    // auth modal events
     const authTabs = document.querySelectorAll('.auth-tab');
     authTabs.forEach(tab => {
       tab.addEventListener('click', function () {
@@ -866,7 +648,6 @@
       });
     }
 
-    // login form submit
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
       loginForm.addEventListener('submit', function (e) {
@@ -890,7 +671,6 @@
       });
     }
 
-    // sign up form submit
     const signupForm = document.getElementById('signupForm');
     if (signupForm) {
       signupForm.addEventListener('submit', function (e) {
@@ -913,7 +693,6 @@
       });
     }
 
-    // logout buttons
     document.querySelectorAll('.logout-btn').forEach(btn => {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
@@ -926,7 +705,10 @@
       });
     });
 
-    // profile form (account settings)
+    // init catalog listeners
+    renderNavUser(db);
+    initCatalogListeners();
+
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
       profileForm.addEventListener('submit', function (e) {
@@ -943,38 +725,6 @@
         alert('Profile updated.');
       });
     }
-
-    // delete account
-    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-    if (deleteAccountBtn) {
-      deleteAccountBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        const ok = confirm('Are you sure you want to permanently delete your account?');
-        if (!ok) return;
-        db = loadDB();
-        const user = getCurrentUser(db);
-        if (!user) return;
-        db.users = db.users.filter(u => u.id !== user.id);
-        db.session = null;
-        saveDB(db);
-        alert('Account deleted.');
-        window.location.href = 'index.html';
-      });
-    }
-
-    // init catalog & account page & nav user
-    renderNavUser(db);
-    renderCatalog(db);
-    renderAccountPage(db);
-    renderCartUI(db);
-    // Init Logic
   });
-
-  // Expose functions to global scope (Now safe because they are defined in IIFE scope)
-  window.loadDB = loadDB;
-  window.addToCart = addToCart;
-  window.renderCartUI = renderCartUI;
-  window.toggleWishlist = toggleWishlist;
-  window.formatRupiah = formatRupiah;
 
 })();

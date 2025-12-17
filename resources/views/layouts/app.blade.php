@@ -17,7 +17,7 @@
 <body>
     <nav class="site-nav">
         <div class="nav-inner">
-            <a class="nav-left" href="{{ route('home') }}"><img src="{{ asset('assets/buitenworks-logo.png') }}"
+            <a class="nav-left" href="{{ route('home') }}"><img src="{{ asset('assets/site/buitenworks-logo.png') }}"
                     class="logo" alt="Buitenworks"></a>
             <div class="nav-center">
                 <a href="{{ route('catalog') }}">Catalog</a>
@@ -27,7 +27,7 @@
             </div>
             <div class="nav-right">
                 <a href="#" id="wishlistBtn" class="ghost text-decoration-none text-black">Wishlist</a>
-                <button id="cartBtn" class="ghost">Cart</button>
+
                 @auth
                     <div class="dropdown d-inline-block">
                         <button class="btn btn-dark dropdown-toggle px-3 py-2 rounded-3 fw-bold" type="button"
@@ -37,11 +37,18 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3 overflow-hidden"
                             style="min-width: 140px;">
+                            @if(Auth::user()->is_admin)
+                                <li><a class="dropdown-item small fw-bold text-primary"
+                                        href="{{ route('admin.dashboard') }}">Admin Dashboard</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                            @endif
                             <li>
                                 <h6 class="dropdown-header small text-muted text-uppercase">Account</h6>
                             </li>
-                            <li><a class="dropdown-item small" href="#">Profile</a></li>
-                            <li><a class="dropdown-item small" href="#">Orders</a></li>
+                            <li><a class="dropdown-item small" href="{{ route('profile.show') }}">Profile</a></li>
+
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -60,66 +67,52 @@
         </div>
     </nav>
 
-    @if(session('success'))
-        <div class="container mt-3">
-            <div class="alert alert-dismissible fade show border-dark bg-white text-dark shadow-sm d-flex align-items-center gap-3"
-                role="alert" style="border-width: 2px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
-                    class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                    <path
-                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-                </svg>
-                <div class="fw-bold">{{ session('success') }}</div>
+    @if(session('success') || session('error'))
+        <div id="global-alert" class="position-fixed top-0 start-50 translate-middle-x p-3 mt-5" style="z-index: 2000;">
+            <div class="alert {{ session('success') ? 'alert-success' : 'alert-danger' }} alert-dismissible fade show shadow-lg border-0 rounded-0"
+                role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    @if(session('success'))
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                            class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                            <path
+                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                        </svg>
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                            class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
+                            <path
+                                d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                        </svg>
+                    @endif
+                    <div class="fw-semibold">{{ session('success') ?? session('error') }}</div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
-    @endif
-    @if(session('error'))
-        <div class="container mt-3">
-            <div class="alert alert-dismissible fade show border-danger bg-white text-danger shadow-sm d-flex align-items-center gap-3"
-                role="alert" style="border-width: 2px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
-                    class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
-                    <path
-                        d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                </svg>
-                <div class="fw-bold">{{ session('error') }}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        </div>
+        <script>
+            setTimeout(function () {
+                var alertNode = document.getElementById('global-alert');
+                if (alertNode) {
+                    var bsAlert = new bootstrap.Alert(alertNode.querySelector('.alert'));
+                    bsAlert.close();
+                }
+            }, 3000);
+        </script>
     @endif
 
     @yield('content')
 
     <footer class="site-footer">
-        <div class="footer-inner">
-            <div class="payments">Payment Method: BCA / Mandiri (Manual Transfer)</div>
-            <div class="copyright">© 2025 Buitenworks development</div>
+        <div class="footer-inner d-flex justify-content-center w-100 py-3">
+            <div class="copyright">© Buitenworks</div>
         </div>
     </footer>
 
     <!-- drawer backdrop -->
     <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
 
-    <!-- cart drawer -->
-    <aside id="cartDrawer" class="cart-drawer" aria-hidden="true">
-        <div class="cart-head">
-            <div class="cart-head-title">Cart</div>
-            <button id="closeCart" class="cart-close-btn">✕</button>
-        </div>
-        <div class="cart-body">
-            <div id="cartEmpty" class="cart-empty">Your cart is empty.</div>
-            <div id="cartItems" class="cart-items"></div>
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total-row">
-                <span>Total</span>
-                <span id="cartTotal">Rp 0</span>
-            </div>
-            <a href="{{ route('checkout') }}" id="checkoutBtn" class="btn primary">Checkout</a>
-            <button id="clearCartBtn" class="btn btn-outline">Clear Cart</button>
-        </div>
-    </aside>
+
 
     <!-- wishlist drawer -->
     <aside id="wishlistDrawer" class="cart-drawer" aria-hidden="true">
@@ -136,7 +129,7 @@
     <!-- global loader -->
     <div id="pageLoader" class="page-loader" aria-hidden="true">
         <div class="loader-inner">
-            <img src="{{ asset('assets/buitenworks-logo.png') }}" alt="Buitenworks" class="loader-logo">
+            <img src="{{ asset('assets/site/buitenworks-logo.png') }}" alt="Buitenworks" class="loader-logo">
             <div class="loader-bar">
                 <div class="loader-bar-fill"></div>
             </div>
@@ -153,7 +146,6 @@
     <script src="{{ asset('js/scripts.js') }}?v={{ time() }}"></script>
     @stack('scripts')
 
-    <!-- Toast Container for JS/Ajax Alerts -->
     <!-- Toast Container for JS/Ajax Alerts -->
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3"
         style="z-index: 1060; margin-top: 60px;">

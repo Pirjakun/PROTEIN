@@ -18,6 +18,8 @@ class Product extends Model
         'image',
         'gallery',
         'category',
+        'shopee_link',
+        'is_featured',
     ];
 
     protected $casts = [
