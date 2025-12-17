@@ -609,15 +609,19 @@
 
     // Note: Cart button logic removed.
 
-    const wishlistBtn = document.getElementById('wishlistBtn');
-    if (wishlistBtn) {
-      wishlistBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        toggleDrawer('wishlistDrawer', true);
-        db = loadDB();
-        renderWishlistUI(db);
-      });
-    }
+    // Updated to handle both desktop and mobile wishlist buttons
+    const wishlistTriggerSelectors = ['#wishlistBtn', '#wishlistBtnMobile'];
+    wishlistTriggerSelectors.forEach(selector => {
+      const btn = document.querySelector(selector);
+      if (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          toggleDrawer('wishlistDrawer', true);
+          db = loadDB();
+          renderWishlistUI(db);
+        });
+      }
+    });
 
     const closeWishlistBtn = document.getElementById('closeWishlist');
     if (closeWishlistBtn) {
