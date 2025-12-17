@@ -55,6 +55,8 @@
                                 <a href="{{ route('admin.dashboard') }}"
                                     class="btn btn-outline-primary w-100 rounded-3 btn-sm mb-2 fw-bold">Admin Dashboard</a>
                             @endif
+                            <a href="{{ route('profile.show') }}"
+                                class="btn btn-outline-dark w-100 rounded-3 btn-sm mb-2 fw-bold">Edit Profile</a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="btn btn-danger w-100 rounded-3 btn-sm">Logout</button>
@@ -86,7 +88,7 @@
                             <li>
                                 <h6 class="dropdown-header small text-muted text-uppercase">Account</h6>
                             </li>
-                            <li><a class="dropdown-item small" href="{{ route('profile.show') }}">Profile</a></li>
+                            <li><a class="dropdown-item small" href="{{ route('profile.show') }}">Edit Profile</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
