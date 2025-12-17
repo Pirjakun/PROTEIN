@@ -51,6 +51,10 @@
                     @else
                         <li class="nav-item d-lg-none">
                             <div class="fw-bold mb-2">{{ Auth::user()->name }}</div>
+                            @if(Auth::user()->is_admin)
+                                <a href="{{ route('admin.dashboard') }}"
+                                    class="btn btn-outline-primary w-100 rounded-3 btn-sm mb-2 fw-bold">Admin Dashboard</a>
+                            @endif
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="btn btn-danger w-100 rounded-3 btn-sm">Logout</button>
