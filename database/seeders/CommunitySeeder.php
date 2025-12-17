@@ -17,6 +17,9 @@ class CommunitySeeder extends Seeder
             ['image' => '1.png', 'created_at' => now(), 'updated_at' => now()],
             ['image' => '2.png', 'created_at' => now(), 'updated_at' => now()],
             ['image' => '3.png', 'created_at' => now(), 'updated_at' => now()],
+            ['image' => '4.png', 'created_at' => now(), 'updated_at' => now()],
+            ['image' => '5.png', 'created_at' => now(), 'updated_at' => now()],
+            ['image' => '6.png', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

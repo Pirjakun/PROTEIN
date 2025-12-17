@@ -13,9 +13,9 @@ class SlideSeeder extends Seeder
     public function run(): void
     {
         $slides = [
-            ['image' => '5.png', 'title' => 'Banner 1'],
-            ['image' => '6.png', 'title' => 'Banner 2'],
-            ['image' => '7.png', 'title' => 'Banner 3'],
+            ['image' => '1.png', 'title' => 'Banner 1'],
+            ['image' => '2.png', 'title' => 'Banner 2'],
+            ['image' => '3.png', 'title' => 'Banner 3'],
         ];
 
         DB::table('slides')->insert($slides);

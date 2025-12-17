@@ -23,7 +23,7 @@ class ProductSeeder extends Seeder
                 'name' => 'BUITENWORKS - Vol.3 Nullism Long sleeve T-Shirt',
                 'description' => "LIMITED STOCK\n\nDouble Layered, Oversized Long Sleeve\n\nMaterial:\n\n- Premium Cotton Combed 24s\n\n- Sablon Plastisol",
                 'price' => 145000,
-                'stock' => 50,
+                'stock' => 10,
                 'image' => 'BUITENWORKS - Vol.3 Nullism Black Long sleeve T-Shirt/1.png',
                 'gallery' => [
                     'BUITENWORKS - Vol.3 Nullism Black Long sleeve T-Shirt/2.png',
@@ -39,7 +39,7 @@ class ProductSeeder extends Seeder
                 'name' => 'BUITENWORKS - Vol.3 Nullism Grey Long sleeve T-Shirt',
                 'description' => "LIMITED STOCK\n\nDouble Layered, Oversized Long Sleeve\n\nMaterial:\n\n- Premium Cotton Combed 24s\n\n- Sablon Plastisol",
                 'price' => 150000,
-                'stock' => 50,
+                'stock' => 8,
                 'image' => 'BUITENWORKS - Vol.3 Nullism Long sleeve T-Shirt/1.png',
                 'gallery' => [
                     'BUITENWORKS - Vol.3 Nullism Long sleeve T-Shirt/2.png',
@@ -55,7 +55,7 @@ class ProductSeeder extends Seeder
                 'name' => 'BUITENWORKS - Vol.1 Stargaze Oversized Boxy T-Shirt',
                 'description' => "LIMITED STOCK\n\nDouble Layered, Oversized Long Sleeve\n\nMaterial:\n\n- Premium Cotton Combed 20s\n\n- Sablon Plastisol",
                 'price' => 150000,
-                'stock' => 50,
+                'stock' => 4,
                 'image' => 'BUITENWORKS - Vol.1 Stargaze Oversized Boxy T-Shirt/1.png',
                 'gallery' => [
                     'BUITENWORKS - Vol.1 Stargaze Oversized Boxy T-Shirt/2.png',
@@ -72,7 +72,7 @@ class ProductSeeder extends Seeder
                 'name' => 'BUITENWORKS - Vol. 2 Liquera WHITE Boxy T-Shirt',
                 'description' => "LIMITED STOCK\n\nBoxy Fit\n\nMaterial :\n\n- Premium Cotton Combed 20s\n\n- Sablon Puff + Plastisol",
                 'price' => 170000,
-                'stock' => 50,
+                'stock' => 7,
                 'image' => 'BUITENWORKS - Vol. 2 Liquera WHITE Boxy T-Shirt/1.png',
                 'gallery' => [
                     'BUITENWORKS - Vol. 2 Liquera WHITE Boxy T-Shirt/2.png',
@@ -89,7 +89,7 @@ class ProductSeeder extends Seeder
                 'name' => 'BUITENWORKS - Vol. 2 Liquera BLACK Boxy T-Shirt',
                 'description' => "LIMITED STOCK\n\nBoxy Fit\n\nMaterial :\n\n- Premium Cotton Combed 20s\n\n- Sablon Puff + Plastisol",
                 'price' => 170000,
-                'stock' => 50,
+                'stock' => 4,
                 'image' => 'BUITENWORKS - Vol. 2 Liquera BLACK Boxy T-Shirt/1.png',
                 'gallery' => [
                     'BUITENWORKS - Vol. 2 Liquera BLACK Boxy T-Shirt/2.png',
