@@ -284,10 +284,12 @@
                             </td>
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->category }}</td>
+                            <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
                             <td>
                                 <form action="{{ route('products.toggleFeatured', $product->id) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="btn btn-sm btn-link text-decoration-none p-0 border-0" title="Toggle Featured">
+                                    <button type="submit" class="btn btn-sm btn-link text-decoration-none p-0 border-0"
+                                        title="Toggle Featured">
                                         @if($product->is_featured)
                                             <span class="fs-4 text-warning">★</span>
                                         @else
@@ -296,7 +298,6 @@
                                     </button>
                                 </form>
                             </td>
-                            <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <a class="btn btn-sm btn-primary" href="{{ route('products.edit', $product->id) }}">Edit</a>
